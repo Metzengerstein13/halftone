@@ -111,6 +111,59 @@
                 </div>
             </div>
 
+            // Activar/Desactivar visualmente los controles según el checkbox
+document.getElementById('enableMicroTrama').addEventListener('change', (e) => {
+    const controls = document.getElementById('microTramaControls');
+    if (e.target.checked) {
+        controls.classList.remove('opacity-50', 'pointer-events-none');
+    } else {
+        controls.classList.add('opacity-50', 'pointer-events-none');
+    }
+    // Volver a renderizar la imagen al cambiar el estado
+    processHalftone(); 
+});
+
+// Función para aplicar la micro-trama posterior
+function applyMicroBreathing(ctx, width, height) {
+    const enable = document.getElementById('enableMicroTrama').checked;
+    if (!enable) return;
+
+    const patternType = document.getElementById('microPattern').value;
+    const porosity = parseInt(document.getElementById('microPorosity').value) / 100;
+
+    // Cambiamos la composición del lienzo a borrado
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+
+    // Paso/Espaciado de los micro-poros (entre 4px y 8px)
+    const step = 6; 
+    const holeSize = step * porosity;
+
+    if (patternType === 'grid') {
+        // Genera micro-perforaciones redondas en cuadrícula
+        for (let x = 0; x < width; x += step) {
+            for (let y = 0; y < height; y += step) {
+                ctx.beginPath();
+                ctx.arc(x + step / 2, y + step / 2, holeSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    } else if (patternType === 'lines') {
+        // Genera micro-líneas en 45 grados para mayor flexibilidad al estirar la tela
+        ctx.lineWidth = holeSize;
+        ctx.strokeStyle = '#000000';
+        
+        for (let i = -height; i < width; i += step * 1.5) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i + height, height);
+            ctx.stroke();
+        }
+    }
+
+    ctx.restore();
+}
+
             <!-- Botón Exportar -->
             <button id="downloadBtn" class="mt-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
