@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Semitonos DTF - Color Halftone</title>
+    <!-- Tailwind CSS vía CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .checkerboard {
+            background-color: #e5e7eb;
+            background-image: linear-gradient(45deg, #cbd5e1 25%, transparent 25%),
+                              linear-gradient(-45deg, #cbd5e1 25%, transparent 25%),
+                              linear-gradient(45deg, transparent 75%, #cbd5e1 75%),
+                              linear-gradient(-45deg, transparent 75%, #cbd5e1 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Encabezado -->
+    <header class="border-b border-slate-800 bg-slate-950 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Preparador de Semitonos DTF/DTG
+            </h1>
+            <span class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-1 rounded">Procesamiento Local (100% Privado)</span>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Panel Lateral de Controles -->
+        <aside class="lg:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col gap-5 overflow-y-auto max-h-[85vh]">
+
+            <!-- Carga de Archivos -->
+            <div>
+                <label class="block text-sm font-semibold mb-2 text-slate-300">Cargar Imagen</label>
+                <div id="dropZone" class="border-2 border-dashed border-slate-600 hover:border-indigo-500 bg-slate-900/50 rounded-lg p-4 text-center cursor-pointer transition">
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <p class="text-xs text-slate-400">Arrastra una imagen o <span class="text-indigo-400 underline">haz clic para buscar</span></p>
+                    <p class="text-[10px] text-slate-500 mt-1">Soporta PNG, JPG, WebP</p>
+                </div>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <!-- Ajustes de Trama (Halftone) -->
+            <div class="space-y-4">
+                <h2 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">Ajustes de Semitono</h2>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label>Tamaño del Punto (LPI/Radio):</label>
+                        <span id="dotSizeVal" class="font-mono text-indigo-400">2</span>
+                    </div>
+                    <input type="range" id="dotSize" min="2" max="15" value="2" class="w-full accent-indigo-500">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label>Contraste previo:</label>
+                        <span id="contrastVal" class="font-mono text-indigo-400">0</span>
+                    </div>
+                    <input type="range" id="contrast" min="-50" max="50" value="0" class="w-full accent-indigo-500">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label>Brillo previo:</label>
+                        <span id="brightnessVal" class="font-mono text-indigo-400">0</span>
+                    </div>
+                    <input type="range" id="brightness" min="-50" max="50" value="0" class="w-full accent-indigo-500">
+                </div>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <!-- Optimización de Tinta (Knockout) -->
+            <div class="space-y-3">
+                <h2 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">Optimización para Prenda</h2>
+
+                <label class="flex items-center gap-2 cursor-pointer text-xs">
+                    <input type="radio" name="prendaMode" id="knockoutBlack" class="accent-indigo-500" checked>
+                    <span>Modo Prenda Negra (Extrae Negro, Conserva Blanco)</span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer text-xs">
+                    <input type="radio" name="prendaMode" id="knockoutWhite" class="accent-indigo-500">
+                    <span>Modo Prenda Blanca (Extrae Blanco, Conserva Negro)</span>
+                </label>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <!-- Fondo de Previsualización -->
+            <div>
+                <label class="block text-xs font-semibold mb-2 text-slate-300">Fondo de Previsualización</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button data-bg="checkerboard" class="bgBtn bg-slate-700 hover:bg-slate-600 text-xs py-1.5 rounded border border-indigo-500 font-medium">Cuadrícula</button>
+                    <button data-bg="black" class="bgBtn bg-black hover:bg-slate-900 text-xs py-1.5 rounded border border-slate-700">Negro</button>
+                    <button data-bg="white" class="bgBtn bg-white text-slate-900 hover:bg-slate-100 text-xs py-1.5 rounded border border-slate-300 font-medium">Blanco</button>
+                </div>
+            </div>
+
+            <!-- Botón Exportar -->
+            <button id="downloadBtn" class="mt-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Exportar PNG Transparente
+            </button>
+
+        </aside>
+
+        <!-- Áreas de Vista Previa -->
+        <main class="lg:col-span-8 flex flex-col gap-4">
+            <div id="previewContainer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex items-center justify-center relative min-h-[400px] checkerboard">
+                <canvas id="outputCanvas" class="max-w-full max-h-[75vh] object-contain shadow-2xl"></canvas>
+                <div id="placeholderText" class="absolute text-slate-500 text-sm pointer-events-none">Carga una imagen para comenzar</div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Lógica de Procesamiento Local con Canvas JS -->
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const previewContainer = document.getElementById('previewContainer');
+        const placeholderText = document.getElementById('placeholderText');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Inputs
+        const dotSizeInput = document.getElementById('dotSize');
+        const contrastInput = document.getElementById('contrast');
+        const brightnessInput = document.getElementById('brightness');
+        const knockoutBlackInput = document.getElementById('knockoutBlack');
+        const knockoutWhiteInput = document.getElementById('knockoutWhite');
+
+        let loadedImage = null;
+
+        // Eventos
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleImage(e.target.files[0]));
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-indigo-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-indigo-500');
+            if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
+        });
+
+        [dotSizeInput, contrastInput, brightnessInput, knockoutBlackInput, knockoutWhiteInput].forEach(input => {
+            input.addEventListener('input', () => {
+                document.getElementById('dotSizeVal').innerText = dotSizeInput.value;
+                document.getElementById('contrastVal').innerText = contrastInput.value;
+                document.getElementById('brightnessVal').innerText = brightnessInput.value;
+                if (loadedImage) processImage();
+            });
+        });
+
+        document.querySelectorAll('.bgBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.bgBtn').forEach(b => b.classList.remove('border-indigo-500'));
+                e.target.classList.add('border-indigo-500');
+
+                previewContainer.className = "flex-1 border border-slate-800 rounded-xl overflow-hidden flex items-center justify-center relative min-h-[400px] ";
+                const bg = e.target.getAttribute('data-bg');
+                if (bg === 'checkerboard') previewContainer.classList.add('checkerboard');
+                else if (bg === 'black') previewContainer.classList.add('bg-black');
+                else if (bg === 'white') previewContainer.classList.add('bg-white');
+            });
+        });
+
+        function handleImage(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImage = img;
+                    placeholderText.style.display = 'none';
+                    downloadBtn.disabled = false;
+                    processImage();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Algoritmo Ajustado Dinámicamente para Camisetas Blancas y Negras
+        function processImage() {
+            if (!loadedImage) return;
+
+            const w = loadedImage.width;
+            const h = loadedImage.height;
+            canvas.width = w;
+            canvas.height = h;
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(loadedImage, 0, 0);
+
+            const imgData = tempCtx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const grid = parseInt(dotSizeInput.value) * 1.5;
+            const contrast = parseInt(contrastInput.value);
+            const brightness = parseInt(brightnessInput.value);
+            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+            const isBlackShirt = knockoutBlackInput.checked;
+
+            for (let y = 0; y < h; y += grid) {
+                for (let x = 0; x < w; x += grid) {
+
+                    let rSum = 0, gSum = 0, bSum = 0, count = 0;
+
+                    for (let cy = 0; cy < grid && (y + cy) < h; cy++) {
+                        for (let cx = 0; cx < grid && (x + cx) < w; cx++) {
+                            const idx = ((y + cy) * w + (x + cx)) * 4;
+                            if (data[idx + 3] > 20) {
+                                rSum += data[idx];
+                                gSum += data[idx + 1];
+                                bSum += data[idx + 2];
+                                count++;
+                            }
+                        }
+                    }
+
+                    if (count === 0) continue;
+
+                    let r = rSum / count;
+                    let g = gSum / count;
+                    let b = bSum / count;
+
+                    r = Math.min(255, Math.max(0, factor * (r + brightness - 128) + 128));
+                    g = Math.min(255, Math.max(0, factor * (g + brightness - 128) + 128));
+                    b = Math.min(255, Math.max(0, factor * (b + brightness - 128) + 128));
+
+                    const luminosity = (r * 0.299 + g * 0.587 + b * 0.114);
+
+                    let intensity = 0;
+
+                    if (isBlackShirt) {
+                        // MODO CAMISETA NEGRA:
+                        // Sombras profundas se eliminan (la tela negra hace la sombra).
+                        // Luces y tonos claros generan puntos grandes.
+                        if (r < 25 && g < 25 && b < 25) continue;
+                        intensity = luminosity / 255;
+                        if (luminosity < 40) intensity *= 0.2;
+                    } else {
+                        // MODO CAMISETA BLANCA:
+                        // Blancos puros se eliminan (la tela blanca hace el fondo).
+                        // Sombras y tonos oscuros generan puntos grandes de tinta.
+                        if (r > 230 && g > 230 && b > 230) continue;
+                        intensity = 1 - (luminosity / 255);
+                        if (luminosity > 215) intensity *= 0.2;
+                    }
+
+                    const maxRadius = grid / 1.1;
+                    const radius = intensity * maxRadius;
+
+                    if (radius > 0.3) {
+                        ctx.beginPath();
+                        ctx.arc(x + grid / 2, y + grid / 2, radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (!loadedImage) return;
+            const link = document.createElement('a');
+            link.download = 'semitono-dtf.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+</html>
