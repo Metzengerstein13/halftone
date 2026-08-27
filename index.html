@@ -22,18 +22,17 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
 
     <!-- Encabezado -->
-<header class="border-b border-slate-800 bg-slate-950 p-4">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold text-white flex items-center gap-3">
-            <!-- Tu imagen de icono (con fondo redondeado y tamaño adecuado) -->
-            <img src="./imghalftone4-p.png" alt="Color-Halftone Logo" class="w-8 h-8 object-contain rounded-md border border-slate-700 bg-slate-900">
-            Color-Halftone <span class="text-xs font-normal text-slate-400 font-mono">(Preparador DTF/DTG)</span>
-        </h1>
-        <span class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2.5 py-1 rounded-full font-medium">
-            Procesamiento Local (100% Privado)
-        </span>
-    </div>
-</header>
+    <header class="border-b border-slate-800 bg-slate-950 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <img src="./imghalftone4-p.png" alt="Color-Halftone Logo" class="w-8 h-8 object-contain rounded-md border border-slate-700 bg-slate-900">
+                Color-Halftone <span class="text-xs font-normal text-slate-400 font-mono">(Preparador DTF/DTG)</span>
+            </h1>
+            <span class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2.5 py-1 rounded-full font-medium">
+                Procesamiento Local (100% Privado)
+            </span>
+        </div>
+    </header>
 
     <!-- Contenido Principal -->
     <div class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -101,6 +100,36 @@
 
             <hr class="border-slate-700">
 
+            <!-- FASE 2: Micro-Texturizado de Respiración -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between mb-1">
+                    <label for="enableMicroTrama" class="text-xs font-bold text-indigo-300 flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="enableMicroTrama" class="accent-indigo-500 rounded">
+                        Micro-Perforado (Respiración)
+                    </label>
+                    <span class="text-[10px] bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 px-1.5 py-0.5 rounded">Fase 2</span>
+                </div>
+
+                <div id="microTramaControls" class="space-y-3 opacity-50 pointer-events-none transition-opacity">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Patrón de Perforación:</label>
+                        <select id="microPattern" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-1.5 text-white">
+                            <option value="grid">Malla Textil (Micro-Puntos)</option>
+                            <option value="lines">Líneas Diagonales de Flexibilidad</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">
+                            Porosidad / Apertura: <span id="microPorosityVal" class="text-indigo-400 font-bold">20%</span>
+                        </label>
+                        <input type="range" id="microPorosity" min="10" max="40" step="5" value="20" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-slate-700">
+
             <!-- Fondo de Previsualización -->
             <div>
                 <label class="block text-xs font-semibold mb-2 text-slate-300">Fondo de Previsualización</label>
@@ -110,60 +139,7 @@
                     <button data-bg="white" class="bgBtn bg-white text-slate-900 hover:bg-slate-100 text-xs py-1.5 rounded border border-slate-300 font-medium">Blanco</button>
                 </div>
             </div>
-
-            // Activar/Desactivar visualmente los controles según el checkbox
-document.getElementById('enableMicroTrama').addEventListener('change', (e) => {
-    const controls = document.getElementById('microTramaControls');
-    if (e.target.checked) {
-        controls.classList.remove('opacity-50', 'pointer-events-none');
-    } else {
-        controls.classList.add('opacity-50', 'pointer-events-none');
-    }
-    // Volver a renderizar la imagen al cambiar el estado
-    processHalftone(); 
-});
-
-// Función para aplicar la micro-trama posterior
-function applyMicroBreathing(ctx, width, height) {
-    const enable = document.getElementById('enableMicroTrama').checked;
-    if (!enable) return;
-
-    const patternType = document.getElementById('microPattern').value;
-    const porosity = parseInt(document.getElementById('microPorosity').value) / 100;
-
-    // Cambiamos la composición del lienzo a borrado
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-
-    // Paso/Espaciado de los micro-poros (entre 4px y 8px)
-    const step = 6; 
-    const holeSize = step * porosity;
-
-    if (patternType === 'grid') {
-        // Genera micro-perforaciones redondas en cuadrícula
-        for (let x = 0; x < width; x += step) {
-            for (let y = 0; y < height; y += step) {
-                ctx.beginPath();
-                ctx.arc(x + step / 2, y + step / 2, holeSize / 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    } else if (patternType === 'lines') {
-        // Genera micro-líneas en 45 grados para mayor flexibilidad al estirar la tela
-        ctx.lineWidth = holeSize;
-        ctx.strokeStyle = '#000000';
-        
-        for (let i = -height; i < width; i += step * 1.5) {
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i + height, height);
-            ctx.stroke();
-        }
-    }
-
-    ctx.restore();
-}
-
+            
             <!-- Botón Exportar -->
             <button id="downloadBtn" class="mt-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -192,16 +168,79 @@ function applyMicroBreathing(ctx, width, height) {
         const placeholderText = document.getElementById('placeholderText');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        // Inputs
+        // Inputs Semitono Base
         const dotSizeInput = document.getElementById('dotSize');
         const contrastInput = document.getElementById('contrast');
         const brightnessInput = document.getElementById('brightness');
         const knockoutBlackInput = document.getElementById('knockoutBlack');
         const knockoutWhiteInput = document.getElementById('knockoutWhite');
 
+        // Inputs Fase 2 (Micro-Perforado)
+        const enableMicroTrama = document.getElementById('enableMicroTrama');
+        const microPatternSelect = document.getElementById('microPattern');
+        const microPorosityInput = document.getElementById('microPorosity');
+        const microPorosityVal = document.getElementById('microPorosityVal');
+
         let loadedImage = null;
 
-        // Eventos
+        // --- EVENTOS FASE 2 ---
+        enableMicroTrama.addEventListener('change', (e) => {
+            const controls = document.getElementById('microTramaControls');
+            if (e.target.checked) {
+                controls.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                controls.classList.add('opacity-50', 'pointer-events-none');
+            }
+            if (loadedImage) processImage(); 
+        });
+
+        microPorosityInput.addEventListener('input', () => {
+            microPorosityVal.innerText = microPorosityInput.value + '%';
+            if (loadedImage) processImage();
+        });
+
+        microPatternSelect.addEventListener('change', () => {
+            if (loadedImage) processImage();
+        });
+
+        // Función para aplicar la micro-trama de respiración (Fase 2)
+        function applyMicroBreathing(ctx, width, height) {
+            const enable = enableMicroTrama.checked;
+            if (!enable) return;
+
+            const patternType = microPatternSelect.value;
+            const porosity = parseInt(microPorosityInput.value) / 100;
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+
+            const step = 6;
+            const holeSize = step * porosity;
+
+            if (patternType === 'grid') {
+                for (let x = 0; x < width; x += step) {
+                    for (let y = 0; y < height; y += step) {
+                        ctx.beginPath();
+                        ctx.arc(x + step / 2, y + step / 2, holeSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (patternType === 'lines') {
+                ctx.lineWidth = holeSize;
+                ctx.strokeStyle = '#000000';
+                
+                for (let i = -height; i < width; i += step * 1.5) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i + height, height);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // --- MANEJO DE ARCHIVOS ---
         dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => handleImage(e.target.files[0]));
 
@@ -251,7 +290,7 @@ function applyMicroBreathing(ctx, width, height) {
             reader.readAsDataURL(file);
         }
 
-        // Algoritmo Ajustado Dinámicamente para Camisetas Blancas y Negras
+        // --- ALGORITMO PRINCIPAL ---
         function processImage() {
             if (!loadedImage) return;
 
@@ -310,16 +349,10 @@ function applyMicroBreathing(ctx, width, height) {
                     let intensity = 0;
 
                     if (isBlackShirt) {
-                        // MODO CAMISETA NEGRA:
-                        // Sombras profundas se eliminan (la tela negra hace la sombra).
-                        // Luces y tonos claros generan puntos grandes.
                         if (r < 25 && g < 25 && b < 25) continue;
                         intensity = luminosity / 255;
                         if (luminosity < 40) intensity *= 0.2;
                     } else {
-                        // MODO CAMISETA BLANCA:
-                        // Blancos puros se eliminan (la tela blanca hace el fondo).
-                        // Sombras y tonos oscuros generan puntos grandes de tinta.
                         if (r > 230 && g > 230 && b > 230) continue;
                         intensity = 1 - (luminosity / 255);
                         if (luminosity > 215) intensity *= 0.2;
@@ -336,6 +369,9 @@ function applyMicroBreathing(ctx, width, height) {
                     }
                 }
             }
+
+            // Aplicar Fase 2 (Micro-Perforado de respiración)
+            applyMicroBreathing(ctx, canvas.width, canvas.height);
         }
 
         downloadBtn.addEventListener('click', () => {
